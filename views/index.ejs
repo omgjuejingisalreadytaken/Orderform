@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="/js/client-functions.js"></script>
+    <%# jquery %>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <%# jquery ui%>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <h1>CNY Order</h1>
+
+
+    <form id="shop" action="/order" method="POST">
+        
+        <label for="date-choice">Fulfillment Date </label>
+        <input type="date" dateFormat="dd-mm-yy" id="date-choice" name="fDate" value="<%=weeks[0][0]%>" disabled="true"> 
+
+        <div id="datepicker"></div>
+        <br><br>
+
+ 
+
+        <label for="fulfillment">Fulfillment method</label>
+        <select id="fulfillment" name="fulfillment">
+          <option value="delivery">Delivery</option>
+          <option value="collection">Self-Collection</option>
+        </select>
+        <br><br>
+
+        <label class = "collection-location" for="collection-location">Self Collection location</label>
+        <select class = "collection-location" id="collection-location" name="collection-location">
+          <option value="shop-a">Shop A</option>
+          <option value="shop-b">Shop B</option>
+        </select>
+        <br><br>
+
+        <% for (let i = 0; i < items.length; i++) { %>
+            <div>
+                <label class = "<%= items[i].name %> item-name"> <%= items[i].name %> </label>
+                <input class="<%= items[i].name %> item-quantity" %> type="number" name = <%= "item" + (i + 1) + "quantity" %> value = 0 min = "0"/>
+                <label class = "<%= items[i].name %> unit-price"> <%= items[i].price.week1 %> </label>
+                <label class = "<%= items[i].name %> sub-total"> 0 </label>
+                <p class ="<%= items[i].name %> capacity" style="display: none;"><%= items[i].capacity%></p>    
+            </div>
+            <br>
+        <% }; %>
+        
+        <label class = "delivery-charge" id = "delivery-charge-label">Delivery charge: </label> 
+        <label class = "delivery-charge" id = "delivery-charge"><%=deliveryCharge%></label>
+        <br><br>
+
+        <label>TOTAL: </label> 
+        <label id = "total">0</label>
+        <br><br>
+
+        <input id="submit" type="submit" value="Submit" onkeypress="return event.keyCode != 13;">
+        
+    </form>
+
+    <script>
+    
+    var fd = Number(<%= freeDelivery%>);
+    var dc = Number(<%= deliveryCharge%>);
+    var dailycap = <%- JSON.stringify(dailycap)%>;
+    var items = <%- JSON.stringify(items)%>;
+    var weeks = <%- JSON.stringify(weeks)%>;
+
+
+
+    //shop update functions
+
+    function updateshop(){
+        toggleCollectionLocation();
+        updateTotal()
+        toggleDeliverCharge();
+        toggleSubmit();
+        refreshDatepicker();
+    };
+
+    function updatePrice(){
+        var week = "week"+checkOrderWeek()
+        document.querySelectorAll('.unit-price').forEach(element => {
+            element.innerHTML=
+        });                       
+    };
+
+    function checkOrderWeek(){
+        var day = document.getElementById('date-choice').value;
+        for (let i = 0; i < weeks.length; i++) {
+            if(weeks[i][0]<=day<=weeks[i][1]){
+                return i;
+            };
+        };
+    }
+
+
+    function initialiseDatepicker(date){
+
+        max = new Date(weeks[weeks.length-1][1]);
+        min = new Date(weeks[0][0]);
+
+        $( "#datepicker" ).datepicker({
+            dateFormat: "yy-mm-dd",
+            maxDate: max,
+            minDate: min,
+            defaultDate: date,
+            onSelect: function(date,obj){
+                document.getElementById("date-choice").value = date;
+                updateshop();
+            },
+            beforeShowDay: function(date){
+                var day = [
+                    date.getFullYear(), 
+                    ('0' + (date.getMonth() + 1)).slice(-2),
+                    ('0' + date.getDate()).slice(-2)
+                ].join('-');
+                capacityused = dailycap[day];
+                if(checkcapacity()+capacityused>1000){
+                    return [false,,]
+                }else{
+                    return [true,,]
+                }           
+            }
+        });
+    };
+
+    function refreshDatepicker(){
+        var date = $("#datepicker").datepicker("getDate");
+        $("#datepicker").datepicker("destroy");
+        initialiseDatepicker(date);
+
+    };
+
+    function toggleCollectionLocation(){
+        if(document.getElementById("fulfillment").value == "delivery"){
+            document.querySelectorAll('.collection-location').forEach(element => {
+                element.style.visibility = "hidden";
+            });
+        } else {
+            document.querySelectorAll('.collection-location').forEach(element => {
+                element.style.visibility = "visible";
+            });
+        };
+    };
+
+    function updateTotal(){
+        document.querySelectorAll('.item-quantity').forEach(element => {
+            element.parentNode.querySelector('.sub-total').innerHTML = element.value*element.parentNode.querySelector('.unit-price').innerHTML;
+            var total = 0;
+            document.querySelectorAll('.sub-total').forEach(element => {
+                    total += Number(element.innerHTML);
+            });
+            document.getElementById("total").innerHTML = total;
+        });                       
+    };
+
+    function toggleDeliverCharge(){
+        if(document.getElementById("fulfillment").value == "delivery" && Number(document.getElementById("total").innerHTML) >= fd){
+            document.getElementById("delivery-charge-label").innerHTML="Delivery charge waived";
+            document.getElementById("delivery-charge-label").style.visibility="visible";
+            document.getElementById("delivery-charge").style.visibility="hidden";
+        }else if(document.getElementById("fulfillment").value == "delivery"){
+            document.getElementById("delivery-charge-label").innerHTML="Delivery charge:";
+            document.getElementById("delivery-charge").innerHTML=dc;
+            document.querySelectorAll('.delivery-charge').forEach(element => {
+                element.style.visibility = "visible";
+            });
+        }else{
+            document.querySelectorAll('.delivery-charge').forEach(element => {
+                element.style.visibility = "hidden";
+            });
+        }               
+    };
+
+    function toggleSubmit(){
+        var orderCapacity = checkcapacity();
+        var day = document.getElementById('date-choice').value;
+        if(orderCapacity+dailycap[day]>1000){
+            document.getElementById("submit").disabled = true;
+        }else{
+            document.getElementById("submit").disabled = false;
+        };
+        console.log("ordercapacity= " + orderCapacity);
+        console.log("daycapacity= " + dailycap[day]);
+        console.log(orderCapacity+dailycap[day]);
+    };
+
+    function checkcapacity(){
+        var orderCapacity = 0;
+        document.querySelectorAll('.item-quantity').forEach(element => {
+            orderCapacity += element.value*element.parentNode.querySelector('.capacity').innerHTML;
+        });
+        return orderCapacity;
+    }
+
+
+    //initialise datepicker
+    
+    initialiseDatepicker();
+
+    //Update shop
+
+    updateshop();
+    document.getElementById("shop").addEventListener("change", updateshop);
+
+    </script>
+
+
+</body>
+</html>
