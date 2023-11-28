@@ -41,7 +41,7 @@
 
         <% for (let i = 0; i < items.length; i++) { %>
             <div>
-                <label class = "<%= items[i].name %> item-name"> <%= items[i].name %> </label>
+                <label class = "<%= items[i].name %> item-name"><%= items[i].name %></label>
                 <input class="<%= items[i].name %> item-quantity" %> type="number" name = <%= "item" + (i + 1) + "quantity" %> value = 0 min = "0"/>
                 <label class = "<%= items[i].name %> unit-price"> <%= items[i].price.week1 %> </label>
                 <label class = "<%= items[i].name %> sub-total"> 0 </label>
@@ -80,20 +80,30 @@
         toggleDeliverCharge();
         toggleSubmit();
         refreshDatepicker();
+        updatePrice();
     };
+
+
 
     function updatePrice(){
         var week = "week"+checkOrderWeek()
+        console.log(week);
         document.querySelectorAll('.unit-price').forEach(element => {
-            element.innerHTML=
+            var itemName = element.parentNode.querySelector(".item-name").innerHTML;
+            var newPrice = items.find(x => x.name == itemName).price[week];
+            element.innerHTML = newPrice;
+            console.log("price for " + itemName + " = " + newPrice);
         });                       
     };
 
     function checkOrderWeek(){
         var day = document.getElementById('date-choice').value;
+        day = new Date(day);
         for (let i = 0; i < weeks.length; i++) {
-            if(weeks[i][0]<=day<=weeks[i][1]){
-                return i;
+            var start = new Date(weeks[i][0]);
+            var end = new Date(weeks[i][1]);
+            if(day >= start && day <= end){
+            return i;
             };
         };
     }
@@ -187,7 +197,7 @@
         };
         console.log("ordercapacity= " + orderCapacity);
         console.log("daycapacity= " + dailycap[day]);
-        console.log(orderCapacity+dailycap[day]);
+        console.log("totalcapacity= " + (orderCapacity+dailycap[day]));
     };
 
     function checkcapacity(){
