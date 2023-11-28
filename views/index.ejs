@@ -44,8 +44,7 @@
                 <label class = "<%= items[i].name %> item-name"><%= items[i].name %></label>
                 <input class="<%= items[i].name %> item-quantity" %> type="number" name = <%= "item" + (i + 1) + "quantity" %> value = 0 min = "0"/>
                 <label class = "<%= items[i].name %> unit-price"> <%= items[i].price.week1 %> </label>
-                <label class = "<%= items[i].name %> sub-total"> 0 </label>
-                <p class ="<%= items[i].name %> capacity" style="display: none;"><%= items[i].capacity%></p>    
+                <label class = "<%= items[i].name %> sub-total"> 0 </label> 
             </div>
             <br>
         <% }; %>
@@ -78,9 +77,9 @@
         toggleCollectionLocation();
         updateTotal()
         toggleDeliverCharge();
-        toggleSubmit();
         refreshDatepicker();
         updatePrice();
+        toggleAvailability();
     };
 
 
@@ -187,7 +186,7 @@
         }               
     };
 
-    function toggleSubmit(){
+    function toggleAvailability(){
         var orderCapacity = checkcapacity();
         var day = document.getElementById('date-choice').value;
         if(orderCapacity+dailycap[day]>1000){
@@ -203,7 +202,9 @@
     function checkcapacity(){
         var orderCapacity = 0;
         document.querySelectorAll('.item-quantity').forEach(element => {
-            orderCapacity += element.value*element.parentNode.querySelector('.capacity').innerHTML;
+            var itemName = element.parentNode.querySelector(".item-name").innerHTML;
+            var capacity = items.find(x => x.name == itemName).capacity;
+            orderCapacity += element.value*capacity;
         });
         return orderCapacity;
     }
