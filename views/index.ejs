@@ -7,12 +7,14 @@
     <%# jquery %>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <%# jquery ui%>
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
+    <%# css ui%>
+    <link rel="stylesheet" href="/css/style.css" />
     <title>Document</title>
 </head>
 <body>
-    <h1>CNY Order</h1>
+    <h1>Order</h1>
 
 
     <form id="shop" action="/order" method="POST">
@@ -22,8 +24,6 @@
 
         <div id="datepicker"></div>
         <br><br>
-
- 
 
         <label for="fulfillment">Fulfillment method</label>
         <select id="fulfillment" name="fulfillment">
@@ -39,52 +39,63 @@
         </select>
         <br><br>
 
-        <% for (let i = 0; i < items.length; i++) { %>
-            <div>
-                <label class = "<%= items[i].name %> item-name"><%= items[i].name %></label>
-                <input class="<%= items[i].name %> item-quantity" %> type="number" name = <%= "item" + (i + 1) + "quantity" %> value = 0 min = "0"/>
-                <label class = "<%= items[i].name %> unit-price"> <%= items[i].price.week1 %> </label>
-                <label class = "<%= items[i].name %> sub-total"> 0 </label> 
-            </div>
-            <br>
-        <% }; %>
+
+        <table>
+            <tr>
+              <th>Item Name</th>
+              <th>Quantity</th>
+              <th>Unit Price</th>
+              <th>Price</th>
+            </tr>
+            <% for (let i = 0; i < items.length; i++) { %>
+                <tr>
+                    <td class = "<%= items[i].name %> item-name"><%= items[i].name %></td>
+                    <td><input class="<%= items[i].name %> item-quantity" %> type="number" name = <%= "item" + (i + 1) + "quantity" %> value = 0 min = "0"/></td>
+                    <td class = "<%= items[i].name %> unit-price"><%= items[i].price.week1 %></td>
+                    <td class = "<%= items[i].name %> price">0</td>
+                </tr>
+            <% }; %>
+            <tr></tr>
+            <tr>
+                <td></td><td></td>
+                <td>Subtotal</td>
+                <td id = "subtotal">0</td>
+            </tr>  
+            <tr>
+                <td></td><td></td>
+                <td class = "delivery-charge" id = "delivery-charge-label">Delivery</td>
+                <td class = "delivery-charge" id = "delivery-charge"><%=deliveryCharge%></td>
+            </tr>
+            <tr>
+                <td></td><td></td>
+                <td>TOTAL</td>
+                <td id = "total">0</td>
+            </tr>
+        </table>
         
-        <label class = "delivery-charge" id = "delivery-charge-label">Delivery charge: </label> 
-        <label class = "delivery-charge" id = "delivery-charge"><%=deliveryCharge%></label>
-        <br><br>
-
-        <label>TOTAL: </label> 
-        <label id = "total">0</label>
-        <br><br>
-
         <input id="submit" type="submit" value="Submit" onkeypress="return event.keyCode != 13;">
         
     </form>
 
     <script>
     
-    var fd = Number(<%= freeDelivery%>);
-    var dc = Number(<%= deliveryCharge%>);
+    var freeDelivery = Number(<%= freeDelivery%>);
     var dailycap = <%- JSON.stringify(dailycap)%>;
     var items = <%- JSON.stringify(items)%>;
     var weeks = <%- JSON.stringify(weeks)%>;
-
+    var standardDeliveryCharge = Number(<%= deliveryCharge%>);
 
 
     //shop update functions
 
     function updateshop(){
         toggleCollectionLocation();
-        updateTotal()
-        toggleDeliverCharge();
         refreshDatepicker();
-        updatePrice();
         toggleAvailability();
+        updateTotal();
     };
 
-
-
-    function updatePrice(){
+    function updateUnitPrice(){
         var week = "week"+checkOrderWeek()
         console.log(week);
         document.querySelectorAll('.unit-price').forEach(element => {
@@ -148,43 +159,61 @@
     function toggleCollectionLocation(){
         if(document.getElementById("fulfillment").value == "delivery"){
             document.querySelectorAll('.collection-location').forEach(element => {
-                element.style.visibility = "hidden";
+                element.classList.add("hidden");
+                // element.style.visibility = "hidden";
             });
         } else {
             document.querySelectorAll('.collection-location').forEach(element => {
-                element.style.visibility = "visible";
+                element.classList.remove("hidden");
+                // element.style.visibility = "visible";
             });
         };
     };
 
-    function updateTotal(){
+    function updatePrice(){
+        updateUnitPrice();
         document.querySelectorAll('.item-quantity').forEach(element => {
-            element.parentNode.querySelector('.sub-total').innerHTML = element.value*element.parentNode.querySelector('.unit-price').innerHTML;
-            var total = 0;
-            document.querySelectorAll('.sub-total').forEach(element => {
-                    total += Number(element.innerHTML);
-            });
-            document.getElementById("total").innerHTML = total;
-        });                       
+            element.parentNode.parentNode.querySelector('.price').innerHTML = element.value*element.parentNode.parentNode.querySelector('.unit-price').innerHTML;
+        });                    
+    };
+
+    function updateSubtotal(){
+        updatePrice();
+        var subtotal = 0;
+        document.querySelectorAll('.price').forEach(element => {
+                subtotal += Number(element.innerHTML);
+        });
+        document.getElementById("subtotal").innerHTML = subtotal;
+        return Number(subtotal);                       
     };
 
     function toggleDeliverCharge(){
-        if(document.getElementById("fulfillment").value == "delivery" && Number(document.getElementById("total").innerHTML) >= fd){
-            document.getElementById("delivery-charge-label").innerHTML="Delivery charge waived";
-            document.getElementById("delivery-charge-label").style.visibility="visible";
-            document.getElementById("delivery-charge").style.visibility="hidden";
+        if(document.getElementById("fulfillment").value == "delivery" && updateSubtotal() >= freeDelivery){
+            document.getElementById("delivery-charge-label").innerHTML="Free Delivery";
+            document.getElementById("delivery-charge-label").classList.remove("hidden");
+            document.getElementById("delivery-charge").classList.add("hidden");
+            return 0;
         }else if(document.getElementById("fulfillment").value == "delivery"){
-            document.getElementById("delivery-charge-label").innerHTML="Delivery charge:";
-            document.getElementById("delivery-charge").innerHTML=dc;
+            document.getElementById("delivery-charge-label").innerHTML="Delivery";
+            document.getElementById("delivery-charge").innerHTML=standardDeliveryCharge;
             document.querySelectorAll('.delivery-charge').forEach(element => {
-                element.style.visibility = "visible";
+                element.classList.remove("hidden");           
             });
+            return standardDeliveryCharge;
         }else{
             document.querySelectorAll('.delivery-charge').forEach(element => {
-                element.style.visibility = "hidden";
+                element.classList.add("hidden");
             });
+            return 0;
         }               
     };
+
+    function updateTotal(){
+        var total = updateSubtotal() + toggleDeliverCharge();
+        console.log(typeof toggleDeliverCharge());
+        console.log(total);
+        document.getElementById("total").innerHTML = total;
+    }
 
     function toggleAvailability(){
         var orderCapacity = checkcapacity();
@@ -202,7 +231,7 @@
     function checkcapacity(){
         var orderCapacity = 0;
         document.querySelectorAll('.item-quantity').forEach(element => {
-            var itemName = element.parentNode.querySelector(".item-name").innerHTML;
+            var itemName = element.parentNode.parentNode.querySelector(".item-name").innerHTML;
             var capacity = items.find(x => x.name == itemName).capacity;
             orderCapacity += element.value*capacity;
         });
