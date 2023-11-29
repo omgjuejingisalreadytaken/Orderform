@@ -17,24 +17,21 @@ const db = new pg.Client({
     port:5432,
 });
 
+// var weeks = [];
+// var dailycap;
 
+// const retriveWeeks = `SELECT TO_CHAR(start_date :: DATE, 'yyyy-mm-dd')start_date, TO_CHAR(end_date :: DATE, 'yyyy-mm-dd')end_date FROM "weeks"`;
 
-
-var weeks = [];
-var dailycap;
-
-const retriveWeeks = `SELECT TO_CHAR(start_date :: DATE, 'yyyy-mm-dd')start_date, TO_CHAR(end_date :: DATE, 'yyyy-mm-dd')end_date FROM "weeks"`;
-
-db.connect();
-db.query(retriveWeeks, (err,res)=>{
-    if(err){
-        console.error(err.stack);
-    }else {
-        weeks = res.rows;
-        dailycap = generatedailycap(weeks[0].start_date,weeks[weeks.length-1].end_date,maxCapacity);
-    }
-    db.end();
-});
+// db.connect();
+// db.query(retriveWeeks, (err,res)=>{
+//     if(err){
+//         console.error(err.stack);
+//     }else {
+//         weeks = res.rows;
+//         dailycap = generatedailycap(weeks[0].start_date,weeks[weeks.length-1].end_date,maxCapacity);
+//     }
+//     db.end();
+// });
 
 
 app.set('view engine', 'ejs');
@@ -119,19 +116,14 @@ function generateCart(body,weeks,freeDelivery,deliveryCharge){
 var freeDelivery = 100;
 var deliveryCharge = 30;
 var maxCapacity = 1000;
-// var weeks = [
-//     ["2024-01-12","2024-01-18"],
-//     ["2024-01-19","2024-01-25"],
-//     ["2024-01-26","2024-02-01"],
-//     ["2024-02-02","2024-02-09"],
-// ];
 
-// var weeks = [
-//     {start_date:"2024-01-12", end_date:"2024-01-18"},
-//     {start_date:"2024-01-19", end_date:"2024-01-25"},
-//     {start_date:"2024-01-26", end_date:"2024-02-01"},
-//     {start_date:"2024-02-02", end_date:"2024-02-09"},
-// ];
+
+var weeks = [
+    {start_date:"2024-01-12", end_date:"2024-01-18"},
+    {start_date:"2024-01-19", end_date:"2024-01-25"},
+    {start_date:"2024-01-26", end_date:"2024-02-01"},
+    {start_date:"2024-02-02", end_date:"2024-02-09"},
+];
 
 var items = [];
     items.push({
@@ -156,7 +148,7 @@ var items = [];
         capacity: 20,
     });
 
-// var dailycap = generatedailycap(weeks[0].start_date,weeks[weeks.length-1].end_date,maxCapacity);
+var dailycap = generatedailycap(weeks[0].start_date,weeks[weeks.length-1].end_date,maxCapacity);
 // //console.log(dailycap);
 
 function generatedailycap(startdate,enddate,maxCapacity){
