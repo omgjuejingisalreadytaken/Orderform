@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="/js/client-functions.js"></script>
+    <%# jquery %>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <%# jquery ui%>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
+    <%# css ui%>
+    <link rel="stylesheet" href="/css/style.css" />
+    <title>Document</title>
+</head>
+<body id="particulars-body">
+    <div id="order-details">
+        <p>Fulfillment Date: <%= body.date%></p>
+        <p>By <%= body.fulfillment%></p>
+        <table>
+            <tr>
+              <th>Item Name</th>
+              <th>Quantity</th>
+              <th>Unit Price</th>
+              <th>Price</th>
+            </tr>
+            <% for (let i = 0; i < cart[0].length; i++) { %>
+                <tr>
+                    <% for (let j = 0; j < 4; j++){ %>
+                        <td><%= cart[0][i][j]%></td>
+                    <%};%>
+                </tr>
+            <%};%>
+            <tr>
+                <td></td><td></td>
+                <td>Subtotal</td>
+                <td><%=cart[1]%></td>
+            </tr>  
+            <tr id="delivery-row">
+                <td></td><td></td>
+                <td id="delivery-label">Delivery</td>
+                <td id="delivery-cost"><%=cart[2]%></td>
+            </tr>
+            <tr>
+                <td></td><td></td>
+                <td>TOTAL</td>
+                <td ><%=cart[3]%></td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <form id="particulars" action="/payment" method="POST">
+        
+            <label>Name</label>
+            <input type="text" name="name"><br>
+            <label>Phone</label>
+            <input type="tel" name ="tel"><br>
+            <label>Email</label>
+            <input type="email" name ="email"><br>
+            <label class ="address" for="address">Delivery Address</label>
+            <input class ="address" type="text" name ="address"><br>
+            <label class="outlet">Choose collection outlet</label>
+            <select class="outlet" name="outlet">
+              <option value="ShopA">ShopA</option>
+              <option value="ShopB">ShopB</option>
+            </select><br>
+
+       
+                        
+            <input id="submit" type="submit" value="Submit" onkeypress="return event.keyCode != 13;">
+            
+        </form>
+    </div>
+
+</body>
+</html>
+
+<script>
+
+//load variables
+var body = <%-JSON.stringify(body)%>;
+var cart = <%-JSON.stringify(cart)%>;
+
+
+//functions
+function toggleDeliveryCost(){
+    console.log(body.fulfillment);
+    if(body.fulfillment=="Self-Collection"){
+        document.getElementById('delivery-row').classList.add("hidden");
+    }else if (cart[2]==0){
+        document.getElementById('delivery-label').innerHTML="Free Delivery";
+        document.getElementById('delivery-cost').classList.add("hidden");
+    };
+};
+
+function toggleCollectionDelivery(){
+    if(body.fulfillment=="Self-Collection"){
+        document.querySelectorAll('.address').forEach(element => {
+            element.classList.add("hidden");
+        });
+        document.querySelectorAll('.outlet').forEach(element => {
+                element.classList.remove("hidden");
+        });
+    }else{
+        document.querySelectorAll('.address').forEach(element => {
+            element.classList.remove("hidden");
+        });
+        document.querySelectorAll('.outlet').forEach(element => {
+                element.classList.add("hidden");
+        });
+    };
+};
+
+//toggleDelivery
+toggleDeliveryCost();
+toggleCollectionDelivery();
+
+</script>

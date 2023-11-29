@@ -17,28 +17,20 @@
     <h1>Order</h1>
 
 
-    <form id="shop" action="/order" method="POST">
+    <form id="shop" action="/particulars" method="POST">
         
         <label for="date-choice">Fulfillment Date </label>
-        <input type="date" dateFormat="dd-mm-yy" id="date-choice" name="fDate" value="<%=weeks[0][0]%>" disabled="true"> 
+        <input type="date" dateFormat="dd-mm-yy" id="date-choice" name="date" value="<%=weeks[0][0]%>" readonly="true"> 
 
         <div id="datepicker"></div>
         <br><br>
 
         <label for="fulfillment">Fulfillment method</label>
         <select id="fulfillment" name="fulfillment">
-          <option value="delivery">Delivery</option>
-          <option value="collection">Self-Collection</option>
+          <option value="Delivery">Deliver</option>
+          <option value="Self-Collection">Self-Collection</option>
         </select>
         <br><br>
-
-        <label class = "collection-location" for="collection-location">Self Collection location</label>
-        <select class = "collection-location" id="collection-location" name="collection-location">
-          <option value="shop-a">Shop A</option>
-          <option value="shop-b">Shop B</option>
-        </select>
-        <br><br>
-
 
         <table>
             <tr>
@@ -50,12 +42,11 @@
             <% for (let i = 0; i < items.length; i++) { %>
                 <tr>
                     <td class = "<%= items[i].name %> item-name"><%= items[i].name %></td>
-                    <td><input class="<%= items[i].name %> item-quantity" %> type="number" name = <%= "item" + (i + 1) + "quantity" %> value = 0 min = "0"/></td>
+                    <td><input class="<%= items[i].name %> item-quantity" %> type="number" name = <%=items[i].name%> value = 0 min = "0"/></td>
                     <td class = "<%= items[i].name %> unit-price"><%= items[i].price.week1 %></td>
                     <td class = "<%= items[i].name %> price">0</td>
                 </tr>
             <% }; %>
-            <tr></tr>
             <tr>
                 <td></td><td></td>
                 <td>Subtotal</td>
@@ -89,7 +80,6 @@
     //shop update functions
 
     function updateshop(){
-        toggleCollectionLocation();
         refreshDatepicker();
         toggleAvailability();
         updateTotal();
@@ -156,20 +146,6 @@
 
     };
 
-    function toggleCollectionLocation(){
-        if(document.getElementById("fulfillment").value == "delivery"){
-            document.querySelectorAll('.collection-location').forEach(element => {
-                element.classList.add("hidden");
-                // element.style.visibility = "hidden";
-            });
-        } else {
-            document.querySelectorAll('.collection-location').forEach(element => {
-                element.classList.remove("hidden");
-                // element.style.visibility = "visible";
-            });
-        };
-    };
-
     function updatePrice(){
         updateUnitPrice();
         document.querySelectorAll('.item-quantity').forEach(element => {
@@ -188,22 +164,25 @@
     };
 
     function toggleDeliverCharge(){
-        if(document.getElementById("fulfillment").value == "delivery" && updateSubtotal() >= freeDelivery){
+        if(document.getElementById("fulfillment").value == "Delivery" && updateSubtotal() >= freeDelivery){
             document.getElementById("delivery-charge-label").innerHTML="Free Delivery";
             document.getElementById("delivery-charge-label").classList.remove("hidden");
             document.getElementById("delivery-charge").classList.add("hidden");
+            console.log('freeDelivery');
             return 0;
-        }else if(document.getElementById("fulfillment").value == "delivery"){
+        }else if(document.getElementById("fulfillment").value == "Delivery"){
             document.getElementById("delivery-charge-label").innerHTML="Delivery";
             document.getElementById("delivery-charge").innerHTML=standardDeliveryCharge;
             document.querySelectorAll('.delivery-charge').forEach(element => {
                 element.classList.remove("hidden");           
             });
+            console.log('chargeableDelivery');
             return standardDeliveryCharge;
         }else{
             document.querySelectorAll('.delivery-charge').forEach(element => {
                 element.classList.add("hidden");
             });
+            console.log('collection');
             return 0;
         }               
     };
