@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
     <%# css ui%>
     <link rel="stylesheet" href="/css/style.css" />
-    <title>Document</title>
+    <title>Shop</title>
 </head>
 <body>
     <h1>Order</h1>
@@ -20,7 +20,7 @@
     <form id="shop" action="/particulars" method="POST">
         
         <label for="date-choice">Fulfillment Date </label>
-        <input type="date" dateFormat="dd-mm-yy" id="date-choice" name="date" value="<%=weeks[0][0]%>" readonly="true"> 
+        <input type="date" dateFormat="dd-mm-yy" id="date-choice" name="date" value="<%=weeks[0].start_date%>" readonly="true"> 
 
         <div id="datepicker"></div>
         <br><br>
@@ -100,8 +100,8 @@
         var day = document.getElementById('date-choice').value;
         day = new Date(day);
         for (let i = 0; i < weeks.length; i++) {
-            var start = new Date(weeks[i][0]);
-            var end = new Date(weeks[i][1]);
+            var start = new Date(weeks[i].start_date);
+            var end = new Date(weeks[i].end_date);
             if(day >= start && day <= end){
             return i;
             };
@@ -111,8 +111,8 @@
 
     function initialiseDatepicker(date){
 
-        max = new Date(weeks[weeks.length-1][1]);
-        min = new Date(weeks[0][0]);
+        max = new Date(weeks[weeks.length-1].end_date);
+        min = new Date(weeks[0].start_date);
 
         $( "#datepicker" ).datepicker({
             dateFormat: "yy-mm-dd",

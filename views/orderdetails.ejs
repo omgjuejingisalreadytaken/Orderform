@@ -11,10 +11,38 @@
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
     <%# css ui%>
     <link rel="stylesheet" href="/css/style.css" />
-    <title>Document</title>
+    <title>Enter Details</title>
 </head>
-<body id="particulars-body">
+<body>
+    
+    <div>
+        <h1>Please enter your details</h1>
+
+        <form id="particulars" action="/payment" method="POST">
+        
+            <label>Name</label>
+            <input type="text" name="name"><br>
+            <label>Phone</label>
+            <input type="tel" name ="tel"><br>
+            <label>Email</label>
+            <input type="email" name ="email"><br>
+            <label class ="address">Delivery Address</label>
+            <input class ="address" type="text" name ="address"><br>
+            <label class="outlet">Choose collection outlet</label>
+            <select class="outlet" name="outlet">
+              <option value="ShopA">ShopA</option>
+              <option value="ShopB">ShopB</option>
+            </select><br>
+            <label>Other Comments</label>
+            <input type="text" name ="comments"><br>      
+                        
+            <input id="submit" type="submit" value="Submit" onkeypress="return event.keyCode != 13;">           
+        </form>
+    </div>
+    <br><br>
+
     <div id="order-details">
+        <h3>Your order</h3>
         <p>Fulfillment Date: <%= body.date%></p>
         <p>By <%= body.fulfillment%></p>
         <table>
@@ -48,29 +76,7 @@
             </tr>
         </table>
     </div>
-    <div>
-        <form id="particulars" action="/payment" method="POST">
-        
-            <label>Name</label>
-            <input type="text" name="name"><br>
-            <label>Phone</label>
-            <input type="tel" name ="tel"><br>
-            <label>Email</label>
-            <input type="email" name ="email"><br>
-            <label class ="address" for="address">Delivery Address</label>
-            <input class ="address" type="text" name ="address"><br>
-            <label class="outlet">Choose collection outlet</label>
-            <select class="outlet" name="outlet">
-              <option value="ShopA">ShopA</option>
-              <option value="ShopB">ShopB</option>
-            </select><br>
 
-       
-                        
-            <input id="submit" type="submit" value="Submit" onkeypress="return event.keyCode != 13;">
-            
-        </form>
-    </div>
 
 </body>
 </html>
